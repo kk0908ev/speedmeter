@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head>
+            <style>.lw { font-size: 10px; }</style>
+        </head>
+        <body>
+            
+
+
+            <style>.lw { font-size: 10px; }</style>
+        
+
+            
+
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ジャーナル雑誌の査読スピード評価</title>
+
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6; margin: 20px;
+      background: linear-gradient(to right, #6a11cb, #2575fc);
+      color: white;
+      text-align: left;
+      }
+    .container {max-width: 600px; margin: 0 auto;}
+    .form-group {margin-bottom: 15px;}
+    label {font-weight: bold;}
+    select, input[type="text"], textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+      border: none;
+      border-radius: 5px;
+      background: rgba(255, 255, 255, 0.8);
+      color: #333;}
+
+    #journal-list {
+      border: none;
+      max-height: 150px;
+      overflow-y: auto;
+      margin-top: 5px;
+      position: absolute;
+      background-color: black;
+      width: calc(100% - 22px);
+      display: none;
+      z-index: 100;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    #journal-list li {
+      padding: 8px;
+      cursor: pointer;
+    }
+
+
+    .stars {display: inline-block;}
+    .star {
+      font-size: 24px;
+      color: gray;
+      cursor: pointer;}
+    .star.selected {
+      color: red;}
+  
+    .review-list {
+      color: lightgray;
+      background: ;
+      font-size: 20px;
+      padding: 10px;
+      text-align: left;
+      border-radius: 10px;
+      box-shadow: 0 2px 50px rgba(1, 1, 1, 1);
+      margin-top: 50px;
+    }
+
+    #average-rating {
+      font-size: 18px;
+      font-weight: bold;
+      color: #ff9800;
+      text-align: left;
+    }
+    .btn-submit {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(to right, #4CAF50, #81C784);
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: 0.3s;
+      text-align: center;
+    }
+    .btn-submit:hover {
+      background: linear-gradient(to right, #388E3C, #66BB6A);
+    }
+  </style>
+
+
+
+
+  <div class="container">
+    <h1>Review for Peer Review Speed by Researchers</h1>
+    
+    <div class="form-group">
+      <label for="journal-search">Search the journal:</label>
+      <input type="text" id="journal-search" oninput="searchJournal()" placeholder="Input the journal name...">
+      <ul id="journal-list" style="display:none; padding: 0; margin: 0; list-style: none;"></ul>
+    </div>
+
+    <div id="reviews" class="review-list">
+      <h2>Comprehensive evaluation</h2>
+      <p id="average-rating">・Average Rating:  N/A</p>
+      <p id="review-comments">・No evaluation yet.</p>
+    </div>
+
+    <div id="review-form" style="display:none;">
+      <h2>Share your evaluation</h2>
+      <div class="form-group">
+        <label>Review:</label>
+        <div class="stars">
+          <span class="star" onclick="selectStar(1)">☆</span>
+          <span class="star" onclick="selectStar(2)">☆</span>
+          <span class="star" onclick="selectStar(3)">☆</span>
+          <span class="star" onclick="selectStar(4)">☆</span>
+          <span class="star" onclick="selectStar(5)">☆</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="review-speed">Time required for peer review:</label>
+        <select id="review-speed">
+          <option value="select">please select</option>
+          <option value="within 1 week">within 1 week</option>
+          <option value="within a month">within a month</option>
+          <option value="within 3 months">within 3 months</option>
+          <option value="within 6 months">within 6 months</option>
+          <option value="more than 1 year">more than 1 year</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="review-comment">Commnent:</label>
+        <textarea id="review-comment" rows="4" placeholder="write your comment..."></textarea>
+      </div>
+      <button onclick="submitReview()">Submit</button>
+    </div>
+  </div>
+
+  <script>
+    /*ジャーナルの候補*/
+    const reviews = {};
+    const journals = [
+      "Energy and renewable energy", "Environmental and energy law", "Environmental economics", 
+      "Environmental health", "Environmental humanities", "Environmental sciences", 
+      "Environmental social sciences", "International environmental agreements", 
+      "Environmental laws by country", "Environmental lawsuits", "Environmental ministries", 
+      "Supranational environmental agencies", "Administrative law"
+    ];
+    let selectedJournal = '';
+    let selectedStars = 0;
+
+    function searchJournal() {
+      const query = document.getElementById('journal-search').value.toLowerCase();
+      const filteredJournals = journals.filter(journal => journal.toLowerCase().includes(query));
+      const journalList = document.getElementById('journal-list');
+      journalList.innerHTML = '';
+      if (query && filteredJournals.length > 0) {
+        filteredJournals.forEach(journal => {
+          const li = document.createElement('li');
+          li.textContent = journal;
+          li.onclick = () => selectJournal(journal);
+          journalList.appendChild(li);
+        });
+        journalList.style.display = 'block';
+      } else {
+        journalList.style.display = 'none';
+      }
+    }
+/*候補からジャーナルを選択*/
+    function selectJournal(journal) {
+      selectedJournal = journal;
+      document.getElementById('journal-search').value = journal;
+      document.getElementById('journal-list').style.display = 'none';
+      displayReviewForm();
+    }
+
+    function displayReviewForm() {
+      if (selectedJournal) {
+        document.getElementById('review-form').style.display = 'block';
+      } else {
+        document.getElementById('review-form').style.display = 'none';
+      }
+    }
+
+    function selectStar(starNumber) {
+      selectedStars = starNumber;
+      const stars = document.querySelectorAll('.star');
+      stars.forEach((star, index) => {
+        if (index < starNumber) {
+          star.classList.add('selected');
+        } else {
+          star.classList.remove('selected');
+        }
+      });
+    }
+
+    function submitReview() {
+      if (!selectedJournal || selectedStars === 0 || !document.getElementById('review-speed').value || !document.getElementById('review-comment').value) {
+        alert('Please fill all fields');
+        return;
+      }
+      
+      const review = {
+        stars: selectedStars,
+        speed: document.getElementById('review-speed').value,
+        comment: document.getElementById('review-comment').value
+      };
+      if (!reviews[selectedJournal]) {
+        reviews[selectedJournal] = [];
+      }
+      reviews[selectedJournal].push(review);
+      
+      displayReviews();
+      alert('Submitted!');
+      document.getElementById('review-comment').value = '';
+      document.getElementById('review-speed').value = '';
+      selectStar(0);
+    }
+
+    function clearForm() {
+      selectedStars = 0;
+      document.querySelectorAll('.star').forEach(star => star.classList.remove('selected'));
+      document.getElementById('review-speed').value = '';
+      document.getElementById('review-comment').value = '';
+    }
+
+
+
+    function displayReviews() {
+      const reviewSection = document.getElementById('review-comments');
+      const ratingSection = document.getElementById('average-rating');
+      reviewSection.innerHTML = '';
+      
+      if (!reviews[selectedJournal] || reviews[selectedJournal].length === 0) {
+        reviewSection.textContent = 'No evaluation yet.';
+        ratingSection.textContent = 'Average Rating: N/A';
+        return;
+      }
+      
+      let totalStars = 0;
+      reviews[selectedJournal].forEach(review => {
+        totalStars += review.stars;
+        const reviewText = `<p>☆${review.stars} - ${review.speed}<br>Comment: ${review.comment}</p>`;
+        reviewSection.innerHTML += reviewText;
+      });
+      
+      const averageStars = (totalStars / reviews[selectedJournal].length).toFixed(1);
+      ratingSection.textContent = `Average Rating: ☆${averageStars}`;
+    }
+
+
+  </script>
+
+            <script>// Write JavaScript here</script>
+        
+
+            <script>// Write JavaScript here</script>
+        
+    
+</body>
